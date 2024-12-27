@@ -16,7 +16,7 @@ pipeline {
     stages {
         stage('Fetch Code'){
             steps {
-                git branch: 'docker', url: 'https://github.com/infratute/devops-repo-all.git' 
+                git branch: 'docker', url: 'https://github.com/darvin00/sample-java-ci-cd.git' 
             }
         }
         stage('Build') {
