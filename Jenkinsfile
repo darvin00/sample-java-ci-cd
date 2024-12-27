@@ -16,7 +16,7 @@ pipeline {
     stages {
         stage('Fetch Code'){
             steps {
-                git branch: 'docker', url: 'git@github.com:Java-Techie-jt/docker-jenkins-integration-sample.git' 
+                git branch: 'docker', url: 'https://github.com/infratute/devops-repo-all.git' 
             }
         }
         stage('Build') {
