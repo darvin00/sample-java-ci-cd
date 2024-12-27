@@ -1,83 +1,24 @@
-def COLOR_MAP = [
-    'SUCCESS': 'good', 
-    'FAILURE': 'danger',
-]
 pipeline {
     agent any
-    tools {
-        maven 'MAVEN3'
-        jdk 'OracleJDK17'
-    }
-    environment {
-        registryCredential = 'ecr:us-west-2:awscreds'
-        appRegistry = "905418343282.dkr.ecr.us-west-2.amazonaws.com/vprofileappimg"
-        vprofileRegistry = "https://905418343282.dkr.ecr.us-west-2.amazonaws.com"
-    }
+
     stages {
-        stage('Fetch Code'){
-            steps {
-                git branch: 'docker', url: 'https://github.com/infratute/devops-repo-all.git' 
-            }
-        }
         stage('Build') {
             steps {
-                sh 'mvn install -DskipTests'
-            }
-            post{
-                success {
-                    echo "Now Archiving"
-                    archiveArtifacts artifacts: '**/*.war'
-                }
+                echo 'Building...'
+                // Add your build commands here
             }
         }
-        
-        stage('Checkstyle Analysis') {
+        stage('Test') {
             steps {
-                sh 'mvn checkstyle:checkstyle' 
+                echo 'Testing...'
+                // Add your test commands here
             }
         }
-        stage('Sonar Analysis') {
-            environment {
-                scannerHome = tool 'sonar4.7'
-            }
+        stage('Deploy') {
             steps {
-                withSonarQubeEnv('sonar') {
-                   sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=vprofile \
-                   -Dsonar.projectName=vprofile \
-                   -Dsonar.projectVersion=1.0 \
-                   -Dsonar.sources=src/ \
-                   -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
-                   -Dsonar.junit.reportsPath=target/surefire-reports/ \
-                   -Dsonar.jacoco.reportsPath=target/jacoco.exec \
-                   -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
-              }
-               timeout(time: 3, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
+                echo 'Deploying...'
+                // Add your deploy commands here
             }
         }
-            
-        stage('Build App Image') {
-            steps {
-       
-                script {
-                dockerImage = docker.build( appRegistry + ":$BUILD_NUMBER", "./Docker-files/app/multistage/")
-             }
-
-     }
-    
     }
-        stage('Upload App Image') {
-            steps{
-                script {
-                docker.withRegistry( vprofileRegistry, registryCredential ) {
-                    dockerImage.push("$BUILD_NUMBER")
-                    dockerImage.push('latest')
-                }
-                }
-            }
-        }
-
-    }
-    
 }
